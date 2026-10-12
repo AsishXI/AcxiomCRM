@@ -35,3 +35,20 @@
     }
     </tbody>
 </table>
+@{ int pg = ViewBag.Page; int pgs = ViewBag.Pages; }
+<nav>
+    <ul class="pagination">
+        <li class="page-item @(pg == 1 ? "disabled" : "")">
+            <a class="page-link" asp-action="Index" asp-route-page="@(pg - 1)" asp-route-search="@ViewBag.Search" asp-route-status="@ViewBag.Status">Previous</a>
+        </li>
+        @for (int i = 1; i <= pgs; i++)
+        {
+            <li class="page-item @(i == pg ? "active" : "")">
+                <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-search="@ViewBag.Search" asp-route-status="@ViewBag.Status">@i</a>
+            </li>
+        }
+        <li class="page-item @(pg == pgs ? "disabled" : "")">
+            <a class="page-link" asp-action="Index" asp-route-page="@(pg + 1)" asp-route-search="@ViewBag.Search" asp-route-status="@ViewBag.Status">Next</a>
+        </li>
+    </ul>
+</nav>

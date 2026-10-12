@@ -20,15 +20,23 @@ public class CustomersController : Controller
 
     static string Snap(Customer c) => $"{c.CustomerName}|{c.Email}|{c.Phone}|{c.CompanyName}|{c.City}|{c.State}|{c.Status}";
 
-    public async Task<IActionResult> Index(string? search, string? status)
+    public async Task<IActionResult> Index(string? search, string? status, int page = 1)
     {
+        const int pageSize = 5;
         var q = Scoped();
         if (!string.IsNullOrWhiteSpace(search))
             q = q.Where(c => c.CustomerName.Contains(search) || c.Email.Contains(search) ||
                              c.Phone.Contains(search) || (c.CompanyName != null && c.CompanyName.Contains(search)));
         if (!string.IsNullOrWhiteSpace(status)) q = q.Where(c => c.Status == status);
+
+        int total = await q.CountAsync();
+        int pages = Math.Max(1, (int)Math.Ceiling(total / (double)pageSize));
+        page = Math.Clamp(page, 1, pages);
+
         ViewBag.Search = search; ViewBag.Status = status;
-        return View(await q.OrderByDescending(c => c.CustomerId).ToListAsync());
+        ViewBag.Page = page; ViewBag.Pages = pages;
+        return View(await q.OrderByDescending(c => c.CustomerId)
+                           .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync());
     }
 
     public async Task<IActionResult> Details(int id)
