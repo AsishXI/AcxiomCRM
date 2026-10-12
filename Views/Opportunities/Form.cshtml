@@ -1,0 +1,19 @@
+@model AcxiomCRM.Models.Opportunity
+@{ ViewData["Title"] = "Opportunity"; }
+<h2>Opportunity</h2>
+<form method="post" asp-antiforgery="true">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="row">
+        <div class="col-md-6 mb-3"><label asp-for="OpportunityName" class="form-label"></label><input asp-for="OpportunityName" class="form-control" /><span asp-validation-for="OpportunityName" class="text-danger"></span></div>
+        <div class="col-md-6 mb-3"><label asp-for="CustomerId" class="form-label"></label>
+            <select asp-for="CustomerId" asp-items="@((SelectList)ViewBag.Customers)" class="form-select"><option value="">-- select customer --</option></select>
+            <span asp-validation-for="CustomerId" class="text-danger"></span></div>
+        <div class="col-md-3 mb-3"><label asp-for="Amount" class="form-label"></label><input asp-for="Amount" class="form-control" /><span asp-validation-for="Amount" class="text-danger"></span></div>
+        <div class="col-md-3 mb-3"><label asp-for="Probability" class="form-label"></label><input asp-for="Probability" class="form-control" /><span asp-validation-for="Probability" class="text-danger"></span></div>
+        <div class="col-md-3 mb-3"><label asp-for="Stage" class="form-label"></label>
+            <select asp-for="Stage" asp-items="@(new SelectList(AcxiomCRM.Models.Rules.Stages))" class="form-select"></select></div>
+        <div class="col-md-3 mb-3"><label asp-for="ExpectedCloseDate" class="form-label"></label><input asp-for="ExpectedCloseDate" type="date" class="form-control" /><span asp-validation-for="ExpectedCloseDate" class="text-danger"></span></div>
+    </div>
+    <button class="btn btn-primary">Save</button> <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

@@ -69,6 +69,8 @@ public class Opportunity : IValidatableObject
     public Customer? Customer { get; set; }
     public int? LeadId { get; set; }
 
+    [Range(0.01, 100000000, ErrorMessage = "Opportunity Amount must be greater than 0.")]
+
     public decimal Amount { get; set; }
 
     [Required] public string Stage { get; set; } = "Qualification";

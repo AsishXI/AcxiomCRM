@@ -1,0 +1,31 @@
+@model List<AcxiomCRM.Models.Opportunity>
+@{ ViewData["Title"] = "Opportunities"; }
+<h2>Opportunities</h2>
+@if (TempData["Msg"] != null) { <div class="alert alert-info">@TempData["Msg"]</div> }
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-4"><input name="search" value="@ViewBag.Search" class="form-control" placeholder="Search opportunity or customer" /></div>
+    <div class="col-md-3">
+        <select name="stage" class="form-select" asp-items="@(new SelectList(AcxiomCRM.Models.Rules.Stages, (object?)ViewBag.Stage))"><option value="">All stages</option></select>
+    </div>
+    <div class="col-auto"><button class="btn btn-primary">Search</button> <a asp-action="Index" class="btn btn-outline-secondary">Reset</a></div>
+    <div class="col text-end"><a asp-action="Create" class="btn btn-success">+ New Opportunity</a></div>
+</form>
+<table class="table table-striped">
+    <thead><tr><th>Name</th><th>Customer</th><th>Amount</th><th>Stage</th><th>Prob %</th><th>Close Date</th><th>Status</th><th>Assigned</th><th></th></tr></thead>
+    <tbody>
+    @foreach (var o in Model)
+    {
+        <tr>
+            <td>@o.OpportunityName</td><td>@o.Customer?.CustomerName</td><td>@o.Amount.ToString("N0")</td><td>@o.Stage</td>
+            <td>@o.Probability</td><td>@o.ExpectedCloseDate.ToString("dd MMM yyyy")</td><td>@o.Status</td><td>@o.AssignedTo</td>
+            <td class="text-end">
+                <a asp-action="Edit" asp-route-id="@o.OpportunityId" class="btn btn-sm btn-warning">Edit</a>
+                @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                {
+                    <form asp-action="Delete" asp-route-id="@o.OpportunityId" method="post" class="d-inline" onsubmit="return confirm('Delete this opportunity?');"><button class="btn btn-sm btn-danger">Delete</button></form>
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

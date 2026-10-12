@@ -1,0 +1,34 @@
+@model List<AcxiomCRM.Models.Lead>
+@{ ViewData["Title"] = "Leads"; }
+<h2>Leads</h2>
+@if (TempData["Msg"] != null) { <div class="alert alert-info">@TempData["Msg"]</div> }
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-4"><input name="search" value="@ViewBag.Search" class="form-control" placeholder="Search name, company, assigned user" /></div>
+    <div class="col-md-3">
+        <select name="status" class="form-select" asp-items="@(new SelectList(AcxiomCRM.Models.Rules.LeadStatuses, (object?)ViewBag.Status))"><option value="">All statuses</option></select>
+    </div>
+    <div class="col-auto"><button class="btn btn-primary">Search</button> <a asp-action="Index" class="btn btn-outline-secondary">Reset</a></div>
+    <div class="col text-end"><a asp-action="Create" class="btn btn-success">+ New Lead</a></div>
+</form>
+<table class="table table-striped">
+    <thead><tr><th>Code</th><th>Name</th><th>Company</th><th>Email</th><th>Status</th><th>Value</th><th>Assigned</th><th></th></tr></thead>
+    <tbody>
+    @foreach (var l in Model)
+    {
+        <tr>
+            <td>@l.LeadCode</td><td>@l.LeadName</td><td>@l.CompanyName</td><td>@l.Email</td><td>@l.Status</td><td>@l.ExpectedValue.ToString("N0")</td><td>@l.AssignedTo</td>
+            <td class="text-end">
+                <a asp-action="Edit" asp-route-id="@l.LeadId" class="btn btn-sm btn-warning">Edit</a>
+                @if (l.Status == "Qualified")
+                {
+                    <form asp-action="Convert" asp-route-id="@l.LeadId" method="post" class="d-inline"><button class="btn btn-sm btn-success">Convert</button></form>
+                }
+                @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                {
+                    <form asp-action="Delete" asp-route-id="@l.LeadId" method="post" class="d-inline" onsubmit="return confirm('Delete this lead?');"><button class="btn btn-sm btn-danger">Delete</button></form>
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
