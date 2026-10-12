@@ -1,8 +1,54 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-}
+﻿@model AcxiomCRM.Models.DashboardVm
+@{ ViewData["Title"] = "Dashboard"; }
+<h2 class="mb-3">AcxiomCRM Dashboard</h2>
+<p class="text-muted">Showing data for: <strong>@(User.IsInRole("Admin") ? "Admin (all records)" : User.IsInRole("Manager") ? "Manager (team)" : "Sales Executive (assigned)")</strong></p>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="row g-3 mb-4">
+    @{
+        var cards = new (string, string, string)[] {
+            ("Total Customers", Model.TotalCustomers.ToString(), "primary"),
+            ("Total Leads", Model.TotalLeads.ToString(), "info"),
+            ("Open Leads", Model.OpenLeads.ToString(), "info"),
+            ("Total Opportunities", Model.TotalOpps.ToString(), "secondary"),
+            ("Open Opportunities", Model.OpenOpps.ToString(), "warning"),
+            ("Won Opportunities", Model.WonOpps.ToString(), "success"),
+            ("Lost Opportunities", Model.LostOpps.ToString(), "danger"),
+            ("Total Pipeline Value", Model.PipelineValue.ToString("N0"), "dark")
+        };
+    }
+    @foreach (var c in cards)
+    {
+        <div class="col-6 col-md-3">
+            <div class="card text-bg-@c.Item3 h-100"><div class="card-body">
+                <div class="small">@c.Item1</div><div class="fs-3 fw-bold">@c.Item2</div>
+            </div></div>
+        </div>
+    }
 </div>
+
+<div class="row g-4">
+    <div class="col-md-4"><div class="card p-3"><h6>Lead Status</h6><canvas id="leadChart"></canvas></div></div>
+    <div class="col-md-4"><div class="card p-3"><h6>Opportunity Pipeline</h6><canvas id="stageChart"></canvas></div></div>
+    <div class="col-md-4"><div class="card p-3"><h6>Monthly Sales (Won)</h6><canvas id="monthChart"></canvas></div></div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <script>
+        const colors = ['#0d6efd', '#17a2b8', '#198754', '#dc3545', '#6f42c1'];
+        new Chart(document.getElementById('leadChart'), {
+            type: 'doughnut',
+            data: { labels: @Html.Raw(Json.Serialize(Model.LeadLabels)), datasets: [{ data: @Html.Raw(Json.Serialize(Model.LeadCounts)), backgroundColor: colors }] }
+        });
+        new Chart(document.getElementById('stageChart'), {
+            type: 'bar',
+            data: { labels: @Html.Raw(Json.Serialize(Model.StageLabels)), datasets: [{ label: 'Opportunities', data: @Html.Raw(Json.Serialize(Model.StageCounts)), backgroundColor: colors }] },
+            options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+        });
+        new Chart(document.getElementById('monthChart'), {
+            type: 'line',
+            data: { labels: @Html.Raw(Json.Serialize(Model.MonthLabels)), datasets: [{ label: 'Won amount', data: @Html.Raw(Json.Serialize(Model.MonthTotals)), borderColor: '#198754', tension: 0.3 }] },
+            options: { scales: { y: { beginAtZero: true } } }
+        });
+    </script>
+}
