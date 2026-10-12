@@ -33,6 +33,13 @@
                             <a class="nav-link text-dark" asp-controller="Opportunities" asp-action="Index">Opportunities</a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="FollowUps" asp-action="Index">Follow-Ups</a>
+                        </li>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item"><a class="nav-link text-dark" asp-controller="Audit" asp-action="Index">Audit Log</a></li>
+                        }
+                        <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
                     </ul>

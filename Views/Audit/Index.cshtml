@@ -1,0 +1,20 @@
+@model List<AcxiomCRM.Models.AuditLog>
+@{ ViewData["Title"] = "Audit Log"; }
+<h2>Audit Log</h2>
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-2"><input name="user" value="@ViewBag.User" class="form-control" placeholder="User" /></div>
+    <div class="col-md-2"><select name="entity" class="form-select" asp-items="@(new SelectList(new[]{"Account","Customer","Lead","Opportunity","FollowUp"}, (object?)ViewBag.Entity))"><option value="">All modules</option></select></div>
+    <div class="col-md-2"><select name="action" class="form-select" asp-items="@(new SelectList(new[]{"Login","FailedLogin","Logout","Create","Update","Delete","Convert"}, (object?)ViewBag.Action))"><option value="">All actions</option></select></div>
+    <div class="col-md-2"><input type="date" name="from" value="@(((DateTime?)ViewBag.From)?.ToString("yyyy-MM-dd"))" class="form-control" /></div>
+    <div class="col-md-2"><input type="date" name="to" value="@(((DateTime?)ViewBag.To)?.ToString("yyyy-MM-dd"))" class="form-control" /></div>
+    <div class="col-auto"><button class="btn btn-primary">Filter</button> <a asp-action="Index" class="btn btn-outline-secondary">Reset</a></div>
+</form>
+<table class="table table-sm table-striped">
+    <thead><tr><th>Time</th><th>User</th><th>Action</th><th>Entity</th><th>Record</th><th>Old</th><th>New</th><th>IP</th></tr></thead>
+    <tbody>
+    @foreach (var a in Model)
+    {
+        <tr><td>@a.CreatedDate.ToString("dd MMM HH:mm:ss")</td><td>@a.UserName</td><td>@a.Action</td><td>@a.EntityName</td><td>@a.RecordId</td><td class="small">@a.OldValue</td><td class="small">@a.NewValue</td><td>@a.IpAddress</td></tr>
+    }
+    </tbody>
+</table>

@@ -65,6 +65,29 @@ app.UseRouting();
 
 app.UseAuthorization();
 
+app.Use(async (ctx, next) =>
+{
+    await next();
+    if (ctx.Request.Method != "POST") return;
+    var path = ctx.Request.Path.Value ?? "";
+    bool isLogin = path.Equals("/Identity/Account/Login", StringComparison.OrdinalIgnoreCase);
+    bool isLogout = path.Equals("/Identity/Account/Logout", StringComparison.OrdinalIgnoreCase);
+    if (!isLogin && !isLogout) return;
+
+    string who = isLogin && ctx.Request.HasFormContentType ? ctx.Request.Form["Input.Email"].ToString() : (ctx.User.Identity?.Name ?? "");
+    bool ok = ctx.Response.StatusCode == 302;
+    var db = ctx.RequestServices.GetRequiredService<ApplicationDbContext>();
+    db.AuditLogs.Add(new AcxiomCRM.Models.AuditLog
+    {
+        UserName = who,
+        Action = isLogout ? "Logout" : ok ? "Login" : "FailedLogin",
+        EntityName = "Account",
+        NewValue = isLogout ? "Signed out" : ok ? "Success" : "Invalid credentials or lockout",
+        IpAddress = ctx.Connection.RemoteIpAddress?.ToString()
+    });
+    await db.SaveChangesAsync();
+});
+
 app.MapStaticAssets();
 
 app.MapControllerRoute(
