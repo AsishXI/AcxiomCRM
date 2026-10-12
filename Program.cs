@@ -26,6 +26,9 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<AcxiomCRM.Services.AuditService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -55,4 +58,25 @@ app.MapControllerRoute(
 app.MapRazorPages()
    .WithStaticAssets();
 
+using (var scope = app.Services.CreateScope())
+{
+    var sp = scope.ServiceProvider;
+    sp.GetRequiredService<ApplicationDbContext>().Database.Migrate();
+    var roleMgr = sp.GetRequiredService<RoleManager<IdentityRole>>();
+    var userMgr = sp.GetRequiredService<UserManager<IdentityUser>>();
+
+    foreach (var r in new[] { "Admin", "Manager", "SalesExecutive" })
+        if (!await roleMgr.RoleExistsAsync(r)) await roleMgr.CreateAsync(new IdentityRole(r));
+
+    async Task SeedUser(string email, string role)
+    {
+        if (await userMgr.FindByEmailAsync(email) != null) return;
+        var u = new IdentityUser { UserName = email, Email = email, EmailConfirmed = true };
+        if ((await userMgr.CreateAsync(u, "Test@1234")).Succeeded)
+            await userMgr.AddToRoleAsync(u, role);
+    }
+    await SeedUser("admin@acxiom.com", "Admin");
+    await SeedUser("manager@acxiom.com", "Manager");
+    await SeedUser("sales@acxiom.com", "SalesExecutive");
+}
 app.Run();

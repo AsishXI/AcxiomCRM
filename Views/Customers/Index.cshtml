@@ -1,0 +1,37 @@
+@model List<AcxiomCRM.Models.Customer>
+@{ ViewData["Title"] = "Customers"; }
+<h2>Customers</h2>
+@if (TempData["Msg"] != null) { <div class="alert alert-success">@TempData["Msg"]</div> }
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-5"><input name="search" value="@ViewBag.Search" class="form-control" placeholder="Search name, email, phone, company" /></div>
+    <div class="col-md-3">
+        <select name="status" class="form-select">
+            <option value="">All statuses</option>
+            <option selected="@(ViewBag.Status == "Active")">Active</option>
+            <option selected="@(ViewBag.Status == "Inactive")">Inactive</option>
+        </select>
+    </div>
+    <div class="col-auto"><button class="btn btn-primary">Search</button> <a asp-action="Index" class="btn btn-outline-secondary">Reset</a></div>
+    <div class="col text-end"><a asp-action="Create" class="btn btn-success">+ New Customer</a></div>
+</form>
+<table class="table table-striped">
+    <thead><tr><th>Code</th><th>Name</th><th>Email</th><th>Phone</th><th>Company</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    @foreach (var c in Model)
+    {
+        <tr>
+            <td>@c.CustomerCode</td><td>@c.CustomerName</td><td>@c.Email</td><td>@c.Phone</td><td>@c.CompanyName</td><td>@c.Status</td>
+            <td class="text-end">
+                <a asp-action="Details" asp-route-id="@c.CustomerId" class="btn btn-sm btn-info">Details</a>
+                <a asp-action="Edit" asp-route-id="@c.CustomerId" class="btn btn-sm btn-warning">Edit</a>
+                @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                {
+                    <form asp-action="Delete" asp-route-id="@c.CustomerId" method="post" class="d-inline" onsubmit="return confirm('Delete this customer?');">
+                        <button class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
